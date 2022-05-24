@@ -1,1 +1,26 @@
+const fs = require('fs');
+const path = require('path');
+const src = path.join(__dirname,'\\files\\');
+const dist = path.join(__dirname,'\\filesCopy\\');
 
+
+
+async function copyDir(src, dist) {
+  try {
+    await fs.promises.mkdir(dist, { recursive: true }).catch(console.error);
+        for(let file of await fs.promises.readdir(src, {withFileTypes: true})){
+         let srcFile = src + file.name;
+            let distFile = dist + file.name;
+                 if (file.isDirectory()) {
+                     copyDir(srcFile + '/', distFile + '/');
+                      }
+                else {await fs.promises.copyFile(srcFile, distFile, fs.constants.COPYFILE_EXCL);}
+         }
+    }
+    catch{(console.log('directory already exists'))}
+}
+
+ copyDir(src, dist);
+    
+    
+  
