@@ -4,6 +4,7 @@ const filePath = path.join(__dirname,'styles');
 const fileDist = path.join(__dirname,'project-dist','style.css');
 const project_dist = path.join(__dirname,'project-dist');
 
+//styles
 const writeToFile = fs.createWriteStream(fileDist); //tast 2
 fs.promises.mkdir(project_dist , { recursive: true }).catch(console.error);
 
@@ -19,10 +20,9 @@ fs.readdir(filePath, { withFileTypes: true },function (err, files) {    //task 3
     })
 })
 
+//assets
 const src = path.join(__dirname,'assets');
 const dist = path.join(__dirname,'project-dist','assets');
-
-
 
 async function copyDir(src, dist) {
   await fs.promises.mkdir(dist, { recursive: true }).catch(console.error);
@@ -43,5 +43,21 @@ async function copyDir(src, dist) {
     await copyDir(src, dist);}
   )();
 
-
-  console.log('Если вас не затруднит ,оставьте пожалуйста свои контакты (discord or telegram), сегодня - завтра доделаю и сразу напишу ');
+//html
+  (async function () {
+  const components = path.join(__dirname, 'components') 
+  const elements = (await  fs.promises.readdir(components, {withFileTypes: true}))
+    .filter((el) => {
+        return path.extname(el.name).toLowerCase() === '.html';
+    })
+    .map(el => {
+        return el.name;
+    });
+   let  template = await fs.promises.readFile(path.join(__dirname, 'template.html'), 'utf-8'); 
+   for (const elem of elements) {
+      const oldElem= new RegExp(`{{${elem.replace(/\.[^/.]+$/, '')}}}`, 'g');// место фрагмента
+      const newElem = await fs.promises.readFile(path.join(components, elem), 'utf-8'); 
+      template = template.replace(oldElem, newElem);     // замена фрагментов
+    }
+        await fs.promises.writeFile(path.join(project_dist, 'index.html'), template)
+    })();
